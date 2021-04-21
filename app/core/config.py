@@ -1,7 +1,11 @@
+import logging
+import sys
 import secrets
-from typing import Optional, Dict, Any, List, Union
+from loguru import logger
+from typing import Any, Dict, List, Optional, Union
 
 from pydantic import AnyHttpUrl, BaseSettings, PostgresDsn, validator
+from app.core.logging import InterceptHandler
 
 
 class Settings(BaseSettings):
@@ -38,6 +42,16 @@ class Settings(BaseSettings):
             host=values.get("POSTGRES_SERVER"),
             path=f"/{values.get('POSTGRES_DB') or ''}",
         )
+
+    LOGGING_LEVEL = logging.DEBUG if DEBUG else logging.INFO
+    LOGGERS = ("uvicorn.asgi", "uvicorn.access")
+
+    logging.getLogger().handlers = [InterceptHandler()]
+    for logger_name in LOGGERS:
+        logging_logger = logging.getLogger(logger_name)
+        logging_logger.handlers = [InterceptHandler(level=LOGGING_LEVEL)]
+
+    logger.configure(handlers=[{"sink": sys.stderr, "level": LOGGING_LEVEL}])
 
     class Config:
         case_sensitive = True
