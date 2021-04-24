@@ -1,10 +1,11 @@
 import logging
-import sys
 import secrets
-from loguru import logger
+import sys
 from typing import Any, Dict, List, Optional, Union
 
+from loguru import logger
 from pydantic import AnyHttpUrl, BaseSettings, PostgresDsn, validator
+
 from app.core.logging import InterceptHandler
 
 
